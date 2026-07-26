@@ -9,6 +9,8 @@ import java.util.Map;
 import project.Airport;
 import project.Flight;
 
+//ovo su sad drugi komentar i main
+
 public class SystemData {
 
 	public static ArrayList<Airport> airports = new ArrayList<Airport>();
