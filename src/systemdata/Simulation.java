@@ -5,6 +5,8 @@ import java.util.List;
 import gui.MapPanel;
 import project.Flight;
 
+//comment
+
 public class Simulation implements Runnable {
 
 	// trenutno simulirano vreme od 00:00
