@@ -23,8 +23,10 @@ import java.awt.event.WindowEvent;
 
 import file.CSVParser;
 import file.JSONParser;
+import exceptions.DuplicateAirportCodeException;
 import exceptions.FileReadException;
 import exceptions.FileWriteException;
+import exceptions.MyException;
 import exceptions.ParsingException;
 import exceptions.UnsupportedFileFormatException;
 import project.Airport;
@@ -178,8 +180,9 @@ public class MyWindow extends Frame {
 					} else {
 						throw new UnsupportedFileFormatException(extension);
 					}
-				} catch (FileReadException | ParsingException | UnsupportedFileFormatException ex) {
-					GreskaDialog.prikazi(MyWindow.this, ex.getMessage());
+				} catch (MyException ex) 
+				{
+					ExceptionDialog.show(MyWindow.this, ex.getMessage());
 					return; // ne osvezavaj prikaz ako ucitavanje nije uspelo
 				}
 
@@ -259,7 +262,7 @@ public class MyWindow extends Frame {
 		    try {
 		        parser.save(dir + filename);
 		    } catch (FileWriteException ex) {
-		        GreskaDialog.prikazi(MyWindow.this, ex.getMessage());
+		        ExceptionDialog.show(MyWindow.this, ex.getMessage());
 		    }
 		});
 
@@ -278,7 +281,7 @@ public class MyWindow extends Frame {
 		    try {
 		        parser.save(dir + filename);
 		    } catch (FileWriteException ex) {
-		        GreskaDialog.prikazi(MyWindow.this, ex.getMessage());
+		        ExceptionDialog.show(MyWindow.this, ex.getMessage());
 		    }
 		});
 

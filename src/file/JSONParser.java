@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 import exceptions.FileReadException;
 import exceptions.FileWriteException;
+import exceptions.InvalidAirportCodeException;
+import exceptions.InvalidCoordinateException;
 import exceptions.InvalidTimeFormatException;
 import exceptions.MalformedLineException;
 import exceptions.ParsingException;
@@ -20,7 +22,7 @@ import systemdata.SystemData;
 public class JSONParser implements Parser {
 
     @Override
-    public ArrayList<Object> load(String path) throws FileReadException, ParsingException {
+    public ArrayList<Object> load(String path) throws FileReadException, ParsingException{
         ArrayList<Object> result = new ArrayList<>();
         String mode = "";
 
@@ -56,7 +58,7 @@ public class JSONParser implements Parser {
                     if (mode.equals("AIRPORTS")) {
                         Airport a = parseAirportLine(line);
                         result.add(a);
-                        SystemData.mapAirport(a);
+                        //SystemData.mapAirport(a); narusava enkapsulaciju
                     } else if (mode.equals("FLIGHTS")) {
                         Flight f = parseFlightLine(line);
                         result.add(f);
@@ -105,7 +107,7 @@ public class JSONParser implements Parser {
 
     // ----- parse za objekte -----
 
-    private Airport parseAirportLine(String line) throws MalformedLineException {
+    private Airport parseAirportLine(String line) throws MalformedLineException, InvalidAirportCodeException, InvalidCoordinateException {
         String code = extractString(line, "code");
         String name = extractString(line, "name");
         int x = extractInt(line, "x");

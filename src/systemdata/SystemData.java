@@ -1,15 +1,12 @@
 package systemdata;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import exceptions.DuplicateAirportCodeException;
 import project.Airport;
 import project.Flight;
-
-
 
 public class SystemData {
 
@@ -17,14 +14,19 @@ public class SystemData {
 	public static ArrayList<Flight> flights = new ArrayList<Flight>();
 
 	private static ArrayList<Airport> checkedAirports = new ArrayList<Airport>();
-	private static Map<String, Airport> map = new HashMap<>();
+	private static Map<String, Airport> map = new HashMap<>();  //mozda visak, koristi se za brzu proveru duplikata aerodroma
 
-	private static ArrayList<Flight> activeFlights = null;
+	private static ArrayList<Flight> activeFlights = null;  //predstavlja avione koji su odabrani letove koji su implicitno odabrani u check listi,
+															//prate se svi letovi za koje je izabran polazni aerodrom bilo da jeste ili nije izabran i dolazni
 
-	public static void store(ArrayList<Object> arr) {
+	private static final ArrayList<Flight> inFlight = new ArrayList<>(); //predstavlja avione(flights) koji su trenutno u letu
+
+	
+	public static void store(ArrayList<Object> arr) throws DuplicateAirportCodeException {
 		for (Object obj : arr) {
 			if (obj instanceof Airport) {
 				airports.add((Airport) obj);
+				mapAirport((Airport) obj);  //ovde se proverava da li vec postoji aerodrom
 			} else if (obj instanceof Flight) {
 				flights.add((Flight) obj);
 			}
@@ -47,15 +49,15 @@ public class SystemData {
 		checkedAirports.remove(a);
 	}
 
-	public static void mapAirport(Airport airport) {
+	public static void mapAirport(Airport airport) throws DuplicateAirportCodeException {
 		if (airport == null) {
-			// ERROR
+			// ERROR ne bi smeo da se desi, ali ipak treba pokriti sa exceptionom
 		}
 
 		String code = airport.getCode();
 
 		if (map.containsKey(code)) {
-			// ERROR
+			throw new DuplicateAirportCodeException(code);
 		}
 
 		map.put(code, airport);
@@ -66,6 +68,7 @@ public class SystemData {
 		if (a == null) {
 			// ERROR nepostojeci aerodrom
 		}
+		
 		return a;
 	}
 
@@ -138,9 +141,7 @@ public class SystemData {
 	public static void resetActiveFlights() {
 		activeFlights = null;
 	}
-	
-	
-	private static final ArrayList<Flight> inFlight = new ArrayList<>();
+
 
 	public static void addInFlight(Flight f) {
 		synchronized (inFlight) {
@@ -159,27 +160,26 @@ public class SystemData {
 			return new ArrayList<>(inFlight);
 		}
 	}
-	
+
 	public static void clearInFlight() {
-	    synchronized (inFlight) {
-	        inFlight.clear();
-	    }
+		synchronized (inFlight) {
+			inFlight.clear();
+		}
 	}
 
 	public static void resetAirportsBusy() {
-	    for (Airport a : airports) {
-	        synchronized (a) {
-	            a.setBusy(false);
-	            a.notifyAll();
-	        }
-	    }
-	}
-	
-	public static boolean isInFlightEmpty() {
-	    synchronized (inFlight) {
-	        return inFlight.isEmpty();
-	    }
+		for (Airport a : airports) {
+			synchronized (a) {
+				a.setBusy(false);
+				a.notifyAll();
+			}
+		}
 	}
 
-	
+	public static boolean isInFlightEmpty() {
+		synchronized (inFlight) {
+			return inFlight.isEmpty();
+		}
+	}
+
 }

@@ -25,6 +25,8 @@ public class Flight {
 		this.depMinute = departureMinute;
 		this.duration = duration;
 	}
+	
+	
 
 	public String toString() {
 		return String.format("%-5s -> %5s  %02d:%02d   %5d min", from.getCode(), to.getCode(), depHour, depMinute,
@@ -84,11 +86,11 @@ public class Flight {
 		});
 		this.flightThread.start();
 	}
-	
+
 	public void stopFlight() {
-	    if (this.flightThread != null) {
-	        this.flightThread.interrupt();
-	    }
+		if (this.flightThread != null) {
+			this.flightThread.interrupt();
+		}
 	}
 
 	public void draw(Graphics g, MapPanel panel) {
@@ -140,19 +142,18 @@ public class Flight {
 	public Airport getFrom() {
 		return this.from;
 	}
-	
+
 	public Airport getTo() {
 		return this.to;
 	}
-	
+
 	public int getDuration() {
 		return this.duration;
 	}
-	
+
 	public String serialize() {
-	    return from.getCode() + "," + to.getCode() + ","
-	            + String.format("%02d:%02d", depHour, depMinute) + "," + duration;
+		return from.getCode() + "," + to.getCode() + "," + String.format("%02d:%02d", depHour, depMinute) + ","
+				+ duration;
 	}
-	
 
 }

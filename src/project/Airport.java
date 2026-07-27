@@ -3,7 +3,16 @@ package project;
 import java.util.HashMap;
 import java.util.Map;
 
+import exceptions.InvalidAirportCodeException;
+import exceptions.InvalidCoordinateException;
+
 public class Airport {
+	
+	public static final double X_MIN = -180;
+	public static final double X_MAX = 180;
+	public static final double Y_MIN = -90;
+	public static final double Y_MAX = 90;
+	
 	
 	private String CODE;
 	private String name;
@@ -12,14 +21,23 @@ public class Airport {
 	private volatile boolean busy = false; //used for flight simulation
 	
 	
-	public Airport(String code, String name, int x, int y) {
+	public Airport(String code, String name, int x, int y) throws InvalidAirportCodeException, InvalidCoordinateException {
 	
-		
-		this.CODE = code;
-		this.name = name;
-		this.x = x;
-		this.y = y;
-	}
+		 if (code == null || !code.matches("[A-Z]{3}")) {
+		        throw new InvalidAirportCodeException(code, name);
+		    }
+		    if (x < X_MIN || x > X_MAX) {
+		        throw new InvalidCoordinateException("X", x, X_MIN, X_MAX, name);
+		    }
+		    if (y < Y_MIN || y > Y_MAX) {
+		        throw new InvalidCoordinateException("Y", y, Y_MIN, Y_MAX, name);
+		    }
+
+		    this.CODE = code;
+		    this.name = name;
+		    this.x = x;
+		    this.y = y;
+		}
 
 	public String getCode() {
 		return CODE;

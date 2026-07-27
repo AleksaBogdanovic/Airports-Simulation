@@ -12,11 +12,12 @@ import systemdata.SystemData;
 
 public class MapPanel extends Canvas {
 
-	private static final double X_MIN = -180;
-	private static final double X_MAX = 180;
-	private static final double Y_MIN = -90;
-	private static final double Y_MAX = 90;
 
+	private static final double X_MIN = Airport.X_MIN;
+	private static final double X_MAX = Airport.X_MAX;
+	private static final double Y_MIN = Airport.Y_MIN;
+	private static final double Y_MAX = Airport.Y_MAX;
+	
 	private Airport selectedAirport = null;
 	private boolean selectedRed = true;
 	Thread blinkingSelected;

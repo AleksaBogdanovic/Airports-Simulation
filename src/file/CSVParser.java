@@ -6,9 +6,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import exceptions.FileReadException;
 import exceptions.FileWriteException;
+import exceptions.InvalidAirportCodeException;
+import exceptions.InvalidCoordinateException;
 import exceptions.InvalidHeaderException;
 import exceptions.InvalidTimeFormatException;
 import exceptions.MalformedLineException;
@@ -20,6 +24,8 @@ import project.Flight;
 import systemdata.SystemData;
 
 public class CSVParser implements Parser {
+	
+	private static Map<String, Airport> mapAirport = new HashMap<>();  //koristi se za proveru da li je aerodorom postojeci ili ne 
 
 	@Override
 	public ArrayList<Object> load(String path) throws FileReadException, ParsingException {
@@ -70,7 +76,7 @@ public class CSVParser implements Parser {
 		return result;
 	}
 
-	private Object parseLine(String line, String mode) throws ParsingException {
+	private Object parseLine(String line, String mode) throws ParsingException, InvalidAirportCodeException, InvalidCoordinateException {
 		if (mode.equals("AIRPORTS")) {
 			return parseAirportLine(line);
 		} else if (mode.equals("FLIGHTS")) {
@@ -80,7 +86,7 @@ public class CSVParser implements Parser {
 		throw new MalformedLineException(line, "line must appear after '# AIRPORTS' or '# FLIGHTS'");
 	}
 
-	private Airport parseAirportLine(String line) throws MalformedLineException {
+	private Airport parseAirportLine(String line) throws MalformedLineException, InvalidAirportCodeException, InvalidCoordinateException {
 		String[] data = line.split(",");
 		if (data.length != 4) {
 			throw new MalformedLineException(line, "CODE,NAME,X,Y");
@@ -98,7 +104,7 @@ public class CSVParser implements Parser {
 
 		
 		Airport a = new Airport(code, name, x, y);
-		SystemData.mapAirport(a);
+		mapAirport.put(code, a); //lokalno za svaki parser cuvaj informaciju o aerodromima
 
 		return a;
 	}
@@ -122,7 +128,7 @@ public class CSVParser implements Parser {
 
 		String[] time = departure.split(":");
 		if (time.length != 2) {
-			throw new InvalidTimeFormatException(departure);
+			throw new InvalidTimeFormatException(departure); 
 		}
 		int depHour, depMinute;
 		try {
@@ -132,8 +138,8 @@ public class CSVParser implements Parser {
 			throw new InvalidTimeFormatException(departure);
 		}
 
-		Airport from = SystemData.getAirport(fromCode);
-		Airport to = SystemData.getAirport(toCode);
+		Airport from = mapAirport.get(fromCode);
+		Airport to = mapAirport.get(toCode);
 		if (from == null) {
 			throw new UnknownAirportCodeException(fromCode);
 		}
