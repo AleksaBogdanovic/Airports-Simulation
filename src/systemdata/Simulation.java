@@ -5,8 +5,6 @@ import java.util.List;
 import gui.MapPanel;
 import project.Flight;
 
-//comment
-//dodaj promene za grane
 
 
 public class Simulation implements Runnable {

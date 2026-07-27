@@ -103,7 +103,7 @@ public class JSONParser implements Parser {
         return Integer.parseInt(json.substring(start, end));
     }
 
-    // ----- Parsiranje pojedinačnih objekata -----
+    // ----- parse za objekte -----
 
     private Airport parseAirportLine(String line) throws MalformedLineException {
         String code = extractString(line, "code");

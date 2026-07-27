@@ -11,9 +11,6 @@ import project.Flight;
 
 
 
-//ponovo dodati komentari
-
-
 public class SystemData {
 
 	public static ArrayList<Airport> airports = new ArrayList<Airport>();
