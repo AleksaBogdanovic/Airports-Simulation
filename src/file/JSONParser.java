@@ -56,7 +56,7 @@ public class JSONParser implements Parser {
                     if (mode.equals("AIRPORTS")) {
                         Airport a = parseAirportLine(line);
                         result.add(a);
-                        SystemData.mapAirport(a);
+                        //SystemData.mapAirport(a); narusava enkapsulaciju
                     } else if (mode.equals("FLIGHTS")) {
                         Flight f = parseFlightLine(line);
                         result.add(f);

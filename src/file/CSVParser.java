@@ -76,7 +76,7 @@ public class CSVParser implements Parser {
 		} else if (mode.equals("FLIGHTS")) {
 			return parseFlightLine(line);
 		}
-		// linija van sekcije - i ovo je greška u fajlu
+		// linija van sekcije
 		throw new MalformedLineException(line, "line must appear after '# AIRPORTS' or '# FLIGHTS'");
 	}
 
@@ -98,7 +98,7 @@ public class CSVParser implements Parser {
 
 		
 		Airport a = new Airport(code, name, x, y);
-		SystemData.mapAirport(a);
+		//SystemData.mapAirport(a); ovo ne bi smelo da bude u ovoj klasi tako parser zna za postojanje systemdata, pa su spregnuti
 
 		return a;
 	}
