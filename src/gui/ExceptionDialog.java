@@ -9,9 +9,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class GreskaDialog {
+public class ExceptionDialog {
 
-	public static void prikazi(Frame parent, String poruka) {
+	public static void show(Frame parent, String poruka) {
 		Dialog dialog = new Dialog(parent, "Greška", true); // true = modalan
 		dialog.setLayout(new java.awt.BorderLayout());
 

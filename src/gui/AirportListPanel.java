@@ -3,13 +3,14 @@ package gui;
 import java.awt.Checkbox;
 import java.awt.GridLayout;
 import java.awt.Panel;
+import java.util.ArrayList;
 
 import project.Airport;
-import systemdata.SystemData;
+import systemdata.AirportRegistry;
 
 public class AirportListPanel extends Panel{
 	
-   
+    private final ArrayList<Airport> checked = new ArrayList<Airport>();
     
     private Runnable onChangeCallback;
 
@@ -28,21 +29,21 @@ public class AirportListPanel extends Panel{
 	public void refresh() {
 		removeAll();
 
-        for (Airport a : SystemData.getAirports()) {
+        for (Airport a : AirportRegistry.all()) {
             String tekst = a.getCode()
                     + "[" + a.getX() + ", " + a.getY() + "]";
 
             Checkbox checkbox = new Checkbox(tekst);
-            checkbox.setState(SystemData.getCheckedAirports().contains(a));
+            checkbox.setState(checked.contains(a));
 
             
             checkbox.addItemListener(e -> {
                 if (checkbox.getState()) {
-                    SystemData.addToCheckedAirport(a);
+                    checked.add(a);
                 } else {
-                    SystemData.removeFromCheckedAirport(a);
+                    checked.remove(a);
                 }
-            	SystemData.resetActiveFlights();   
+            	//SystemData.resetActiveFlights();   
                 if (onChangeCallback != null) {
                     onChangeCallback.run();
                 }
@@ -56,4 +57,7 @@ public class AirportListPanel extends Panel{
 	}
 	
 
+	public ArrayList<Airport> getCheckedAirports(){
+		return this.checked;
+	}
 }

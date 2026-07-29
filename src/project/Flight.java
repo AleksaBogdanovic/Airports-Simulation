@@ -3,7 +3,8 @@ package project;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import gui.MapPanel;
+import gui.CoordinateMapper;
+import systemdata.AirportRegistry;
 import systemdata.Simulation;
 import systemdata.SystemData;
 
@@ -25,73 +26,16 @@ public class Flight {
 		this.depMinute = departureMinute;
 		this.duration = duration;
 	}
+	
+	
 
 	public String toString() {
 		return String.format("%-5s -> %5s  %02d:%02d   %5d min", from.getCode(), to.getCode(), depHour, depMinute,
 				duration);
 	}
 
-	private void simulateFlight() {
-		System.out.println("simulateFlight start: " + this);
 
-		double durationMS = this.duration * 100; // podeli sa deset minuta i pomnozi sa 1000ms
-
-		int currentTime = 0;
-
-		try {
-			synchronized (this.from) {
-				while (this.from.airportBusy()) {
-					this.from.wait();
-				}
-				this.from.setBusy(true);
-				System.out.println("from busy postavljen, kreće let: " + this);
-
-			}
-			this.departureSimTime = simulation.getSimulatedTime(); // stvarni trenutak poletanja
-			SystemData.addInFlight(this);
-			System.out.println("dodat u inFlight, trenutno u vazduhu: " + SystemData.getInFlight().size());
-
-			boolean waitTimePassed = false;
-			while (!Thread.interrupted() && currentTime < durationMS) {
-
-				Thread.sleep(200);
-
-				currentTime += 200;
-				if (currentTime >= Flight.WAIT_TIME && !waitTimePassed) {
-					synchronized (this.from) {
-						this.from.setBusy(false);
-						this.from.notifyAll();
-					}
-					waitTimePassed = true;
-				}
-
-				if (currentTime >= durationMS) {
-					simulation.onFlightFinished(this);
-				}
-
-			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-
-	}
-
-	public void startFlight(Simulation sim) {
-		System.out.println("startFlight pozvan za let: " + this);
-		this.simulation = sim;
-		this.flightThread = new Thread(() -> {
-			simulateFlight();
-		});
-		this.flightThread.start();
-	}
-	
-	public void stopFlight() {
-	    if (this.flightThread != null) {
-	        this.flightThread.interrupt();
-	    }
-	}
-
-	public void draw(Graphics g, MapPanel panel) {
+	public void draw(Graphics g, CoordinateMapper scaler) {
 		int now = simulation.getSimulatedTime();
 		int elapsed = Math.min(now - this.departureSimTime, this.duration);// proteklo simulirano vreme (u minutima), za
 																			// slucaj da je proslo vise nego sto let
@@ -100,8 +44,8 @@ public class Flight {
 		double xRaw = from.getX() + this.displacementX() * elapsed;
 		double yRaw = from.getY() + this.displacementY() * elapsed;
 
-		int x = panel.scaleX((int) xRaw);
-		int y = panel.scaleY((int) yRaw);
+		int x = scaler.scaleX((int) xRaw);
+		int y = scaler.scaleY((int) yRaw);
 
 		g.setColor(Color.BLUE);
 		g.fillOval(x - 5, y - 5, 10, 10);
@@ -140,19 +84,17 @@ public class Flight {
 	public Airport getFrom() {
 		return this.from;
 	}
-	
+
 	public Airport getTo() {
 		return this.to;
 	}
-	
+
 	public int getDuration() {
 		return this.duration;
 	}
-	
-	public String serialize() {
-	    return from.getCode() + "," + to.getCode() + ","
-	            + String.format("%02d:%02d", depHour, depMinute) + "," + duration;
-	}
-	
 
+	public String serialize() {
+		return from.getCode() + "," + to.getCode() + "," + String.format("%02d:%02d", depHour, depMinute) + ","
+				+ duration;
+	}
 }

@@ -6,21 +6,30 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import exceptions.FileReadException;
 import exceptions.FileWriteException;
+import exceptions.InvalidAirportCodeException;
+import exceptions.InvalidCoordinateException;
 import exceptions.InvalidTimeFormatException;
 import exceptions.MalformedLineException;
 import exceptions.ParsingException;
 import exceptions.UnknownAirportCodeException;
 import project.Airport;
 import project.Flight;
+
+import systemdata.AirportRegistry;
+import systemdata.FlightSchedule;
 import systemdata.SystemData;
 
 public class JSONParser implements Parser {
 
+	private Map<String, Airport> mapAirport = new HashMap<>();  		//koristi se za brzu proveru da li je aerodorom postojeci ili ne 
+	
     @Override
-    public ArrayList<Object> load(String path) throws FileReadException, ParsingException {
+    public ArrayList<Object> load(String path) throws FileReadException, ParsingException{
         ArrayList<Object> result = new ArrayList<>();
         String mode = "";
 
@@ -56,7 +65,6 @@ public class JSONParser implements Parser {
                     if (mode.equals("AIRPORTS")) {
                         Airport a = parseAirportLine(line);
                         result.add(a);
-                        //SystemData.mapAirport(a); narusava enkapsulaciju
                     } else if (mode.equals("FLIGHTS")) {
                         Flight f = parseFlightLine(line);
                         result.add(f);
@@ -105,7 +113,7 @@ public class JSONParser implements Parser {
 
     // ----- parse za objekte -----
 
-    private Airport parseAirportLine(String line) throws MalformedLineException {
+    private Airport parseAirportLine(String line) throws MalformedLineException, InvalidAirportCodeException, InvalidCoordinateException {
         String code = extractString(line, "code");
         String name = extractString(line, "name");
         int x = extractInt(line, "x");
@@ -139,17 +147,16 @@ public class JSONParser implements Parser {
             throw new InvalidTimeFormatException(departure);
         }
 
-        Airport from = SystemData.getAirport(fromCode);
-        Airport to = SystemData.getAirport(toCode);
-        if (from == null) {
-            throw new UnknownAirportCodeException(fromCode);
-        }
-        if (to == null) {
-            throw new UnknownAirportCodeException(toCode);
-        }
+        Airport from = mapAirport.get(fromCode);
+		if(from == null) {
+			throw new UnknownAirportCodeException(fromCode);
+		}
+		Airport to = mapAirport.get(toCode);
+		if(to == null) {
+			throw new UnknownAirportCodeException(toCode);
+		}
 
-        return new Flight(from, to, depHour, depMinute, duration);
-    }
+		return new Flight(from, to, depHour, depMinute, duration);    }
 
 
 	@Override
@@ -159,7 +166,7 @@ public class JSONParser implements Parser {
 
 	        // AIRPORTS 
 	        pw.println("\"airports\":[");
-	        ArrayList<Airport> airports = SystemData.getAirports();
+	        ArrayList<Airport> airports = AirportRegistry.all();
 	        for (int i = 0; i < airports.size(); i++) {
 	            Airport a = airports.get(i);
 	            String comma = (i < airports.size() - 1) ? "," : "";
@@ -169,7 +176,7 @@ public class JSONParser implements Parser {
 
 	        // FLIGHTS 
 	        pw.println("\"flights\":[");
-	        ArrayList<Flight> flights = SystemData.flights;
+	        ArrayList<Flight> flights = FlightSchedule.all();
 	        for (int i = 0; i < flights.size(); i++) {
 	            Flight f = flights.get(i);
 	            String comma = (i < flights.size() - 1) ? "," : "";

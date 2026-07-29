@@ -6,9 +6,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import exceptions.FileReadException;
 import exceptions.FileWriteException;
+import exceptions.InvalidAirportCodeException;
+import exceptions.InvalidCoordinateException;
 import exceptions.InvalidHeaderException;
 import exceptions.InvalidTimeFormatException;
 import exceptions.MalformedLineException;
@@ -17,10 +21,16 @@ import exceptions.ParsingException;
 import exceptions.UnknownAirportCodeException;
 import project.Airport;
 import project.Flight;
+
+import systemdata.AirportRegistry;
+import systemdata.FlightSchedule;
 import systemdata.SystemData;
 
 public class CSVParser implements Parser {
+	
+	private Map<String, Airport> mapAirport = new HashMap<>();  		//koristi se za brzu proveru da li je aerodorom postojeci ili ne 
 
+	
 	@Override
 	public ArrayList<Object> load(String path) throws FileReadException, ParsingException {
 		ArrayList<Object> result = new ArrayList<>();
@@ -70,7 +80,7 @@ public class CSVParser implements Parser {
 		return result;
 	}
 
-	private Object parseLine(String line, String mode) throws ParsingException {
+	private Object parseLine(String line, String mode) throws ParsingException, InvalidAirportCodeException, InvalidCoordinateException {
 		if (mode.equals("AIRPORTS")) {
 			return parseAirportLine(line);
 		} else if (mode.equals("FLIGHTS")) {
@@ -80,7 +90,7 @@ public class CSVParser implements Parser {
 		throw new MalformedLineException(line, "line must appear after '# AIRPORTS' or '# FLIGHTS'");
 	}
 
-	private Airport parseAirportLine(String line) throws MalformedLineException {
+	private Airport parseAirportLine(String line) throws MalformedLineException, InvalidAirportCodeException, InvalidCoordinateException {
 		String[] data = line.split(",");
 		if (data.length != 4) {
 			throw new MalformedLineException(line, "CODE,NAME,X,Y");
@@ -98,12 +108,12 @@ public class CSVParser implements Parser {
 
 		
 		Airport a = new Airport(code, name, x, y);
-		//SystemData.mapAirport(a); ovo ne bi smelo da bude u ovoj klasi tako parser zna za postojanje systemdata, pa su spregnuti
+		mapAirport.put(code, a);
 
 		return a;
 	}
 
-	private Flight parseFlightLine(String line) throws MalformedLineException, InvalidTimeFormatException, UnknownAirportCodeException {
+	private Flight parseFlightLine(String line) throws MalformedLineException, InvalidTimeFormatException, UnknownAirportCodeException{
 		String[] data = line.split(",");
 		if (data.length != 4) {
 			throw new MalformedLineException(line, "FROM,TO,DEPARTURE,DURATION");
@@ -122,7 +132,7 @@ public class CSVParser implements Parser {
 
 		String[] time = departure.split(":");
 		if (time.length != 2) {
-			throw new InvalidTimeFormatException(departure);
+			throw new InvalidTimeFormatException(departure); 
 		}
 		int depHour, depMinute;
 		try {
@@ -132,12 +142,12 @@ public class CSVParser implements Parser {
 			throw new InvalidTimeFormatException(departure);
 		}
 
-		Airport from = SystemData.getAirport(fromCode);
-		Airport to = SystemData.getAirport(toCode);
-		if (from == null) {
+		Airport from = mapAirport.get(fromCode);
+		if(from == null) {
 			throw new UnknownAirportCodeException(fromCode);
 		}
-		if (to == null) {
+		Airport to = mapAirport.get(toCode);
+		if(to == null) {
 			throw new UnknownAirportCodeException(toCode);
 		}
 
@@ -149,13 +159,13 @@ public class CSVParser implements Parser {
 		try (PrintWriter pw = new PrintWriter(new FileWriter(path, false))) {
 			pw.println("# AIRPORTS");
 			pw.println("CODE,NAME,X,Y");
-			for (Airport a : SystemData.getAirports()) {
+			for (Airport a : AirportRegistry.all()) {
 				pw.println(a.serialize());
 			}
 
 			pw.println("# FLIGHTS");
 			pw.println("FROM,TO,DEPARTURE,DURATION");
-			for (Flight f : SystemData.flights) {
+			for (Flight f : FlightSchedule.all()) {
 				pw.println(f.serialize());
 			}
 		} catch (IOException e) {
