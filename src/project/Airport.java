@@ -1,8 +1,5 @@
 package project;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import exceptions.InvalidAirportCodeException;
 import exceptions.InvalidCoordinateException;
 

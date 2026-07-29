@@ -21,12 +21,16 @@ import exceptions.ParsingException;
 import exceptions.UnknownAirportCodeException;
 import project.Airport;
 import project.Flight;
+
+import systemdata.AirportRegistry;
+import systemdata.FlightSchedule;
 import systemdata.SystemData;
 
 public class CSVParser implements Parser {
 	
-	private static Map<String, Airport> mapAirport = new HashMap<>();  //koristi se za proveru da li je aerodorom postojeci ili ne 
+	private Map<String, Airport> mapAirport = new HashMap<>();  		//koristi se za brzu proveru da li je aerodorom postojeci ili ne 
 
+	
 	@Override
 	public ArrayList<Object> load(String path) throws FileReadException, ParsingException {
 		ArrayList<Object> result = new ArrayList<>();
@@ -104,12 +108,12 @@ public class CSVParser implements Parser {
 
 		
 		Airport a = new Airport(code, name, x, y);
-		mapAirport.put(code, a); //lokalno za svaki parser cuvaj informaciju o aerodromima
+		mapAirport.put(code, a);
 
 		return a;
 	}
 
-	private Flight parseFlightLine(String line) throws MalformedLineException, InvalidTimeFormatException, UnknownAirportCodeException {
+	private Flight parseFlightLine(String line) throws MalformedLineException, InvalidTimeFormatException, UnknownAirportCodeException{
 		String[] data = line.split(",");
 		if (data.length != 4) {
 			throw new MalformedLineException(line, "FROM,TO,DEPARTURE,DURATION");
@@ -139,11 +143,11 @@ public class CSVParser implements Parser {
 		}
 
 		Airport from = mapAirport.get(fromCode);
-		Airport to = mapAirport.get(toCode);
-		if (from == null) {
+		if(from == null) {
 			throw new UnknownAirportCodeException(fromCode);
 		}
-		if (to == null) {
+		Airport to = mapAirport.get(toCode);
+		if(to == null) {
 			throw new UnknownAirportCodeException(toCode);
 		}
 
@@ -155,13 +159,13 @@ public class CSVParser implements Parser {
 		try (PrintWriter pw = new PrintWriter(new FileWriter(path, false))) {
 			pw.println("# AIRPORTS");
 			pw.println("CODE,NAME,X,Y");
-			for (Airport a : SystemData.getAirports()) {
+			for (Airport a : AirportRegistry.all()) {
 				pw.println(a.serialize());
 			}
 
 			pw.println("# FLIGHTS");
 			pw.println("FROM,TO,DEPARTURE,DURATION");
-			for (Flight f : SystemData.flights) {
+			for (Flight f : FlightSchedule.all()) {
 				pw.println(f.serialize());
 			}
 		} catch (IOException e) {
