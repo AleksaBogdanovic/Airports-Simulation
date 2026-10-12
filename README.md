@@ -39,11 +39,17 @@ The code separates the data model, application logic and presentation:
 - **Simulation**: runs on its own thread, with shared state protected using `AtomicInteger` and `synchronized`
 
 ## Getting Started
-```bash
-git clone https://github.com/[username]/[repo-name].git
-cd [repo-name]
-[build and run command / main class]
+
+### Requirements
+- Java 21 (JDK)
+- Eclipse IDE for Java Developers (or any IDE that can open an Eclipse project)
+### Run in Eclipse
 ```
+git clone https://github.com/AleksaBogdanovic/Airports-Simulation.git
+```
+1. In Eclipse: **File > Import > General > Existing Projects into Workspace**.
+2. Select the cloned folder and click **Finish**.
+3. Open `gui.Main` and run it with **Run > Run As > Java Application**.
 
 ## What I Learned
 - Designing a layered application with a clear split between model, logic and view
