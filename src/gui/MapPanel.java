@@ -6,8 +6,11 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import project.Airport;
+import systemdata.FlightPosition;
 import systemdata.FlightTask;
 import systemdata.Simulation;
 
@@ -20,6 +23,7 @@ public class MapPanel extends Canvas {
 	private static final int AIRPORT_MARKER_SIZE = AirportRenderer.AIRPORT_MARKER_SIZE;
 	private static final int AIRPLANE_RADIUS = FlightRenderer.AIRPLANE_RADIUS;
 
+	private FlightTask selectedFlight = null;
 	private Airport selectedAirport = null;
 	private boolean selectedRed = true;
 	Thread blinkingSelected;
@@ -85,6 +89,32 @@ public class MapPanel extends Canvas {
 	public void disposeThreads() {
 		stopBlinking();
 	}
+	//=======================================================================================================================================
+	
+	private FlightTask findFlightOn(int mx, int my) {
+	    if (simulation == null) {
+	        return null;
+	    }
+	    CoordinateMapper mapper = new CoordinateMapper(getWidth(), getHeight());
+	    int t = simulation.getSimulatedTime();
+
+	    for (FlightTask task : simulation.inFlightSnapshot()) {
+	        FlightPosition pos = task.currentPosition(t);
+	        int px = mapper.scaleX(pos.getX());
+	        int py = mapper.scaleY(pos.getY());
+
+	        int dx = mx - px;
+	        int dy = my - py;
+	        int r = AIRPLANE_RADIUS + 3;              // +3 px tolerancija
+	        if (dx * dx + dy * dy <= r * r) {
+	            return task;
+	        }
+	    }
+	    return null;
+	}
+	
+	
+	
 	// ===========================================================================================================================================================
 
 	public MapPanel() {
@@ -92,9 +122,33 @@ public class MapPanel extends Canvas {
 
 		this.addMouseListener(new MouseAdapter() { // listener za selektovanje treptanja aerodroma
 			@Override
-			public void mouseClicked(MouseEvent e) {
-				Airport target = findAirportOn(e.getX(), e.getY());
+			public void mouseClicked(MouseEvent e) {	
+				 // 1) Ako je avion vec selektovan -> klik dodaje waypoint tom letu
+				if (selectedFlight != null) {
+				    // klik ponovo na isti avion -> deselektuj, prestani da dodajes tacke
+				    if (findFlightOn(e.getX(), e.getY()) == selectedFlight) {
+				        selectedFlight = null;
+				        repaint();
+				        return;
+				    }
+				    // inace: dodaj waypoint
+				    CoordinateMapper mapper = new CoordinateMapper(getWidth(), getHeight());
+				    selectedFlight.addWaypoint(
+				        new FlightPosition(mapper.unscaleX(e.getX()), mapper.unscaleY(e.getY())));
+				    repaint();
+				    return;
+				}
 
+			    // 2) Da li je klik pogodio neki avion u vazduhu?
+			    FlightTask hitFlight = findFlightOn(e.getX(), e.getY());
+			    if (hitFlight != null) {
+			        MapPanel.this.stopBlinking();      // otkaci eventualni aerodrom
+			        selectedFlight = hitFlight;
+			        repaint();
+			        return;
+			    }	
+				
+				Airport target = findAirportOn(e.getX(), e.getY());
 				if (target == null) {
 					return;
 				}
@@ -108,6 +162,7 @@ public class MapPanel extends Canvas {
 			}
 
 		});
+		
 
 		setVisible(true);
 	}
@@ -138,8 +193,15 @@ public class MapPanel extends Canvas {
 
 		// crtaj avione koje lete
 		if (simulation != null) {
+			List<FlightTask> inAir = simulation.inFlightSnapshot();
+
+			// ako selektovani avion vise nije u vazduhu (sleteo ili reset) -> deselektuj
+			if (selectedFlight != null && !inAir.contains(selectedFlight)) {
+				selectedFlight = null;
+			}
+			
 			int t = simulation.getSimulatedTime();
-			for (FlightTask task : simulation.inFlightSnapshot()) {
+			for (FlightTask task : inAir) {
 				flightRenderer.draw(og, task.currentPosition(t), mapper);
 			}
 		}
@@ -148,3 +210,22 @@ public class MapPanel extends Canvas {
 		g.drawImage(offscreen, 0, 0, this);
 	}
 }
+
+
+/*
+ if (e.getButton() == MouseEvent.BUTTON3) {          // desni klik = blokiraj/odblokiraj
+    Airport target = findAirportOn(e.getX(), e.getY());
+    if (target != null) {
+        target.setBlocked(!target.isBlocked());     // toggle
+        repaint();
+    }
+    return;                                          // desni klik NE radi nista drugo
+}
+ 
+ private volatile boolean blocked = false;
+
+public boolean isBlocked() { return blocked; }
+public void setBlocked(boolean b) { this.blocked = b; } 
+  
+ */
+

@@ -119,6 +119,15 @@ public class Simulation implements Runnable {
 			}
 		}
 	}
+	
+	public void awaitTick() throws InterruptedException {
+	    synchronized (clockLock) {
+	        if (finished || !running) {
+	            return;                    // simulacija stala -> ne blokiraj
+	        }
+	        clockLock.wait();              // cekaj sledeci notifyAll iz tick petlje
+	    }
+	}
 
 	public void taskCompleted() {
 		completed.incrementAndGet();

@@ -35,6 +35,10 @@ public class Airport {
 		    this.x = x;
 		    this.y = y;
 		}
+	
+	public static double distance(Airport a, Airport b) {
+	    return Math.hypot((double) a.x - b.x, (double) b.y - a.y);
+	}
 
 	public String getCode() {
 		return CODE;

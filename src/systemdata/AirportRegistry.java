@@ -14,7 +14,7 @@ public class AirportRegistry {
 	private static Map<String, Airport> byCode = new HashMap<>();  		//koristi se za brzu proveru da li je aerodorom postojeci ili ne 
 
 
-    private AirportRegistry() {}   // sprečava instanciranje
+    private AirportRegistry() {}  
 
     public static void add(Airport a) throws DuplicateAirportCodeException {
         if (byCode.containsKey(a.getCode())) {
@@ -36,3 +36,20 @@ public class AirportRegistry {
     public static boolean isEmpty() { return airports.isEmpty(); }
     public static void clear() { airports.clear(); byCode.clear(); }
 }
+
+
+/*
+public static Airport nearestUnblocked(Airport origin) {
+Airport best = null;
+double bestDist = Double.MAX_VALUE;
+for (Airport a : airports) {
+    if (a == origin || a.isBlocked()) continue;
+    double d = Airport.distance(origin, a);
+    if (d < bestDist) {
+        bestDist = d;
+        best = a;
+    }
+}
+return best;
+}
+*/

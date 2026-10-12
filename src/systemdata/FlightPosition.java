@@ -9,6 +9,10 @@ public class FlightPosition {
         this.x = x;
         this.y = y;
     }
+    
+    public static double distance(FlightPosition a, FlightPosition b) {
+        return Math.hypot(a.x - b.x, b.y - a.y);
+    }
 
     public double getX() { return x; }
     public double getY() { return y; }

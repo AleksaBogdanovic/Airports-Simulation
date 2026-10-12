@@ -19,12 +19,12 @@ import exceptions.MalformedLineException;
 import exceptions.MissingHeaderException;
 import exceptions.ParsingException;
 import exceptions.UnknownAirportCodeException;
+
 import project.Airport;
 import project.Flight;
 
 import systemdata.AirportRegistry;
 import systemdata.FlightSchedule;
-import systemdata.SystemData;
 
 public class CSVParser implements Parser {
 	
