@@ -1,6 +1,6 @@
 # Airports Simulator
 
-A Java desktop application that simulates air traffic between airports, with a Swing GUI that shows airports and flights on a 2D map in real time. Built for the Object-Oriented Programming 2 course at the School of Electrical Engineering (ETF), University of Belgrade.
+A Java desktop application that simulates air traffic between airports, with a GUI that shows airports and flights on a 2D map in real time. Built for the Object-Oriented Programming 2 course at the School of Electrical Engineering (ETF), University of Belgrade.
 
 ![Screenshot](docs/screenshot.png)
 
