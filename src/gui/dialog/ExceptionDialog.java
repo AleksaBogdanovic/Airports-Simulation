@@ -1,4 +1,4 @@
-package gui;
+package gui.dialog;
 
 import java.awt.Button;
 import java.awt.Dialog;
@@ -12,7 +12,7 @@ import java.awt.event.WindowEvent;
 public class ExceptionDialog {
 
 	public static void show(Frame parent, String poruka) {
-		Dialog dialog = new Dialog(parent, "Greška", true); // true = modalan
+		Dialog dialog = new Dialog(parent, "Error", true); // true = modalan
 		dialog.setLayout(new java.awt.BorderLayout());
 
 		Label label = new Label(poruka);

@@ -17,12 +17,12 @@ import exceptions.InvalidTimeFormatException;
 import exceptions.MalformedLineException;
 import exceptions.ParsingException;
 import exceptions.UnknownAirportCodeException;
+
 import project.Airport;
 import project.Flight;
 
 import systemdata.AirportRegistry;
 import systemdata.FlightSchedule;
-import systemdata.SystemData;
 
 public class JSONParser implements Parser {
 
@@ -122,7 +122,11 @@ public class JSONParser implements Parser {
         if (code == null || name == null) {
             throw new MalformedLineException(line, "airport object must contain \"code\", \"name\", \"x\" and \"y\"");
         }
-        return new Airport(code, name, x, y);
+        
+        Airport a = new Airport(code, name, x, y);
+		mapAirport.put(code, a);
+
+		return a;
     }
 
     private Flight parseFlightLine(String line) throws MalformedLineException, InvalidTimeFormatException, UnknownAirportCodeException {

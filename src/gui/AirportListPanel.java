@@ -14,7 +14,8 @@ public class AirportListPanel extends Panel{
     
     private Runnable onChangeCallback;
 
-    public void setOnChangeCallback(Runnable callback) {
+    public void setOnChangeCallback(Runnable callback) { // sluzi da odradi repaint na checkbox listi aviona
+    	
         this.onChangeCallback = callback;
     }
 

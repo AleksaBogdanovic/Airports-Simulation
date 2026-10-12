@@ -25,6 +25,14 @@ public class CoordinateMapper {
 		return (int) ((-y - CoordinateMapper.Y_MIN) / (CoordinateMapper.Y_MAX - CoordinateMapper.Y_MIN)
 				* height);
 	}
+	
+	public double unscaleX(double px) {
+	    return (double) px / width * (X_MAX - X_MIN) + X_MIN;
+	}
+
+	public double unscaleY(double py) {
+	    return -((double) py / height * (Y_MAX - Y_MIN) + Y_MIN);
+	}
 }
 
 

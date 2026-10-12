@@ -23,16 +23,17 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
-import file.CSVParser;
-import file.JSONParser;
-import exceptions.DuplicateAirportCodeException;
-import exceptions.FileReadException;
 import exceptions.FileWriteException;
 import exceptions.MyException;
-import exceptions.ParsingException;
 import exceptions.UnsupportedFileFormatException;
+
+import file.CSVParser;
+import file.JSONParser;
+import gui.dialog.ExceptionDialog;
+import gui.dialog.ShutdownDialog;
 import project.Airport;
 import project.Flight;
+
 import systemdata.AirportRegistry;
 import systemdata.FlightSchedule;
 import systemdata.Simulation;
@@ -50,6 +51,8 @@ public class MyWindow extends Frame {
     private MenuItem startItem;
     private MenuItem pauseItem;
     private MenuItem resetItem;
+    private ShutdownDialog shutdownDialog;
+
 
     
 
@@ -71,6 +74,11 @@ public class MyWindow extends Frame {
 				if (timeLeft == 5) {
 					startShutdownDialog();
 				}
+				
+				if (timeLeft <= 5 && timeLeft > 0 && shutdownDialog != null) {
+				    final int t = timeLeft;
+				    shutdownDialog.updateCountdown(t);
+				}
 
 				if (timeLeft <= 0) {
 					dispose(); // shutdown
@@ -81,40 +89,13 @@ public class MyWindow extends Frame {
 		timer.start();
 	}
 
+	public void resetTimer() {
+	    timeLeft = 60;
+	}
+	
 	private void startShutdownDialog() {
-		Dialog dialog = new Dialog(this, "Warning"); // inactivity dialog
-		dialog.setLayout(new FlowLayout());
-
-		Label label0 = new Label("Closing in " + timeLeft + "s");
-		Label label1 = new Label("Do you want to continue with using the program?");
-		Button continueButton = new Button("Continue");
-		dialog.add(label0);
-		dialog.add(label1);
-		dialog.add(continueButton);
-
-		dialog.setSize(300, 150);
-		dialog.setModal(false);
-		dialog.setLocationRelativeTo(this);
-
-		continueButton.addActionListener(e -> {
-			timeLeft = 60;
-			dialog.dispose();
-		});
-
-		Thread dialogThread = new Thread(() -> {
-			while (timeLeft > 0 && timeLeft <= 5) {
-				label0.setText("Closing in " + timeLeft + "s");
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ex) {
-				}
-			}
-			dialog.dispose();
-		});
-		dialogThread.start();
-
-		dialog.setVisible(true);
-
+		shutdownDialog = new ShutdownDialog(this, "Warning", 5); //5 sekundi je jos ostalo do kraja
+	    shutdownDialog.setVisible(true);
 	}
 
 	private void disposeThreads() {
